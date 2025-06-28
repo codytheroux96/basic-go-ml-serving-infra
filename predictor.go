@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"math"
 	"os"
 
 	"github.com/owulveryck/onnx-go"
@@ -29,6 +31,19 @@ func NewPredictor(modelPath string) (*Predictor, error) {
 	return &Predictor{model: model, backend: backend}, nil
 }
 
+func softmax(logits []float32) []float32 {
+    expSum := float32(0.0)
+    for _, v := range logits {
+        expSum += float32(math.Exp(float64(v)))
+    }
+
+    softmaxValues := make([]float32, len(logits))
+    for i, v := range logits {
+        softmaxValues[i] = float32(math.Exp(float64(v))) / expSum
+    }
+    return softmaxValues
+}
+
 func (p *Predictor) Predict(input []float32) ([]float32, error) {
 	t := tensor.New(tensor.WithShape(1, 1, 28, 28), tensor.WithBacking(input))
 
@@ -40,7 +55,14 @@ func (p *Predictor) Predict(input []float32) ([]float32, error) {
 		return nil, err
 	}
 
-	outputs := p.model.GetInputTensors()
+	outputs, err := p.model.GetOutputTensors()
+	if err != nil {
+		return nil, err
+	}
 
-	return outputs[0].Data().([]float32), nil
+    rawOutput := outputs[0].Data().([]float32)
+    softmaxOutput := softmax(rawOutput)
+    log.Println("Softmax Outputs:", softmaxOutput)
+
+    return softmaxOutput, nil
 }
