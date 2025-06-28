@@ -21,7 +21,7 @@ func NewPredictor(modelPath string) (*Predictor, error) {
 
 	backend := gorgonnx.NewGraph()
 	model := onnx.NewModel(backend)
-	
+
 	if err := model.UnmarshalBinary(b); err != nil {
 		return nil, err
 	}
@@ -32,5 +32,15 @@ func NewPredictor(modelPath string) (*Predictor, error) {
 func (p *Predictor) Predict(input []float32) ([]float32, error) {
 	t := tensor.New(tensor.WithShape(1, 1, 28, 28), tensor.WithBacking(input))
 
-	
+	if err := p.model.SetInput(0, t); err != nil {
+		return nil, err
+	}
+
+	if err := p.backend.Run(); err != nil {
+		return nil, err
+	}
+
+	outputs := p.model.GetInputTensors()
+
+	return outputs[0].Data().([]float32), nil
 }
