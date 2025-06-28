@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"math"
 	"os"
 
@@ -32,16 +31,16 @@ func NewPredictor(modelPath string) (*Predictor, error) {
 }
 
 func softmax(logits []float32) []float32 {
-    expSum := float32(0.0)
-    for _, v := range logits {
-        expSum += float32(math.Exp(float64(v)))
-    }
+	expSum := float32(0.0)
+	for _, v := range logits {
+		expSum += float32(math.Exp(float64(v)))
+	}
 
-    softmaxValues := make([]float32, len(logits))
-    for i, v := range logits {
-        softmaxValues[i] = float32(math.Exp(float64(v))) / expSum
-    }
-    return softmaxValues
+	softmaxValues := make([]float32, len(logits))
+	for i, v := range logits {
+		softmaxValues[i] = float32(math.Exp(float64(v))) / expSum
+	}
+	return softmaxValues
 }
 
 func (p *Predictor) Predict(input []float32) ([]float32, error) {
@@ -60,8 +59,8 @@ func (p *Predictor) Predict(input []float32) ([]float32, error) {
 		return nil, err
 	}
 
-    rawOutput := outputs[0].Data().([]float32)
-    softmaxOutput := softmax(rawOutput)
+	rawOutput := outputs[0].Data().([]float32)
+	softmaxOutput := softmax(rawOutput)
 
-    return softmaxOutput, nil
+	return softmaxOutput, nil
 }
