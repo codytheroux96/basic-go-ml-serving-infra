@@ -62,7 +62,6 @@ func (p *Predictor) Predict(input []float32) ([]float32, error) {
 
     rawOutput := outputs[0].Data().([]float32)
     softmaxOutput := softmax(rawOutput)
-    log.Println("Softmax Outputs:", softmaxOutput)
 
     return softmaxOutput, nil
 }
