@@ -1,6 +1,8 @@
 package main
 
 import (
+	"image"
+	"image/color"
 	"math"
 	"os"
 
@@ -28,6 +30,20 @@ func NewPredictor(modelPath string) (*Predictor, error) {
 	}
 
 	return &Predictor{model: model, backend: backend}, nil
+}
+
+// convert grayscale image to float32 array
+func imageToFloat32Array(img image.Image) []float32 {
+	bounds := img.Bounds()
+	result := make([]float32, 0, bounds.Dx()*bounds.Dy())
+
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			gray := color.GrayModel.Convert(img.At(x, y)).(color.Gray)
+			result = append(result, float32(gray.Y)/255.0)
+		}
+	}
+	return result
 }
 
 func softmax(logits []float32) []float32 {
